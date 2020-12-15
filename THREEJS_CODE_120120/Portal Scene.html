@@ -45,8 +45,8 @@
 			import { MTLLoader } from "./js/examples/jsm/loaders/MTLLoader.js";
 			import { OBJLoader2 } from "/js/examples/jsm/loaders/OBJLoader2.js";
 			import { MtlObjBridge } from "./js/examples/jsm/loaders/MtlObjBridge.js";
-        //const scene = new THREE.Scene();
-
+		//const scene = new THREE.Scene();
+		
         let MyOBJ = null;
 		let MyOBJ2 = null;
 		let MyOBJ3 = null;
@@ -107,11 +107,22 @@
 					const directionalLight1 = new THREE.DirectionalLight( 0xffffff );
 					const directionalLight2 = new THREE.DirectionalLight( 0xf3f3f3 );
 					const directionalLight3 = new THREE.DirectionalLight( 0x70e9ff );
-					directionalLight2.intensity = 0.6;
-					directionalLight3.intensity = 0.5;
+					const directionalLight4 = new THREE.DirectionalLight( 0xffffff );
+
+					directionalLight2.intensity = 0.5;
+					directionalLight3.intensity = 0.2;
+					directionalLight1.intensity = 0.2;
+					directionalLight4.intensity = 0.5;
+
 					directionalLight1.position.set( -100, -50, 100 );
 					directionalLight2.position.set( 100, 50, -100 );
 					directionalLight3.position.set( 100, 30, -100 );
+					directionalLight4.position.set( 0, 100, 0 );
+
+					directionalLight1.castShadow = true;
+					directionalLight2.castShadow = true;
+					directionalLight3.castShadow = true;
+					directionalLight4.castShadow = true;
 
 					//add the lights to the scene
 					this.scene.add( directionalLight1 );
@@ -133,7 +144,7 @@
 					//spotLight.position.set( -80, 50, 50 );
 					spotLight.position.set( -80, 10, 40);
 
-					spotLight.castShadow = false;
+					spotLight.castShadow = true;
 
 					spotLight.shadow.mapSize.width = 1024;
 					spotLight.shadow.mapSize.height = 1024;
@@ -163,8 +174,11 @@
                     cube2.position.x = -210
                     cube2.position.y = 50
                     cube2.position.z = 28
-                    cube2.rotation.y = 300
-                    this.scene.add(cube2);
+					cube2.rotation.y = 300
+					cube2.castShadow = true;
+					cube2.receiveShadow = true;
+					this.scene.add(cube2);
+					
 
                     //create a floor
                     const geometry7 = new THREE.BoxGeometry(130,18,150);
@@ -198,7 +212,8 @@
 					const scope = this;
 					const objLoader2 = new OBJLoader2();
 					const callbackOnLoad = function ( object3d ) {
-                        
+                        object3d.castShadow = true;
+						object3d.receiveShadow = true;
 						object3d.position.y = 25 //This is how to move specific obj's positions//
 						object3d.position.x = -20
 						object3d.position.z = -30
@@ -230,7 +245,8 @@
 				const scope1 = this;
 				const objLoader1 = new OBJLoader2();
 				const callbackOnLoad1 = function ( object3d ) {
-                        
+					object3d.receiveShadow = true;
+					object3d.castShadow = true;
 					scope1.scene.add( object3d );
 					console.log( 'Loading complete: ' + modelName1 );						
 					//MyOBJ = object3d;
@@ -241,13 +257,13 @@
 					objLoader1.setModelName( modelName1 );
 					objLoader1.setLogging( true, true );
 					objLoader1.addMaterials( MtlObjBridge.addMaterialsFromMtlLoader( mtlParseResult ), true );
-					objLoader1.load( './objs/cargoRoom2.obj', callbackOnLoad1, null, null, null );
+					objLoader1.load( './objs/cargoRoom_v3.obj', callbackOnLoad1, null, null, null );
 
 				};
 
 				const mtlLoader1 = new MTLLoader();
 
-				mtlLoader1.load( './objs/cargoRoom2.mtl', onLoadMtl1 );
+				mtlLoader1.load( './objs/cargoRoom_v3.mtl', onLoadMtl1 );
 				
 				///////////////////////////////////
 				//load door
@@ -256,7 +272,8 @@
 				const scope3 = this;
 				const objLoader3 = new OBJLoader2();
 				const callbackOnLoad3 = function ( object3d ) {
-                    
+                    object3d.castShadow = true;
+					object3d.receiveShadow = true;
 					scope3.scene.add( object3d );
 					object3d.position.y = 38 //This is how to move specific obj's positions//
 					object3d.position.x = -140
@@ -288,7 +305,8 @@
 				const scope4 = this;
 				const objLoader4 = new OBJLoader2();
 				const callbackOnLoad4 = function ( object3d ) {
-                    
+					object3d.castShadow = true;
+					object3d.recieveShadow = true;
 					scope4.scene.add( object3d );
 					//object3d.position.y = 38 //This is how to move specific obj's positions//
 					object3d.position.z = 40
@@ -318,7 +336,8 @@
 				const scope5 = this;
 				const objLoader5 = new OBJLoader2();
 				const callbackOnLoad5 = function ( object3d ) {
-                    
+					object3d.castShadow = true;
+					object3d.receiveShadow = true;
 					scope5.scene.add( object3d );
 					object3d.position.y = 38 //This is how to move specific obj's positions//
 					object3d.position.x = -160
@@ -350,7 +369,8 @@
 				const scope6 = this;
 				const objLoader6 = new OBJLoader2();
 				const callbackOnLoad6 = function ( object3d ) {
-                    
+                    object3d.castShadow = true;
+					object3d.receiveShadow = true;
 					scope6.scene.add( object3d );
 					object3d.position.y = 130 //This is how to move specific obj's positions//
 					object3d.position.x = -60
@@ -438,6 +458,8 @@
 				const scope7 = this;
 				const objLoader7 = new OBJLoader2();
 				const callbackOnLoad7 = function ( object3d ) {
+					object3d.castShadow = true;
+					object3d.receiveShadow = true;
                     //set positions and renders into scene
 					scope7.scene.add( object3d );
 					object3d.position.y = 160 //This is how to move specific obj's positions//
@@ -463,8 +485,43 @@
 
 				mtlLoader7.load( './objs/CompanionCube.mtl', onLoadMtl7 );
 
+				const modelName8 = 'tram';
+					
+				const scope8 = this;
+				const objLoader8 = new OBJLoader2();
+				const callbackOnLoad8 = function ( object3d ) {
+					object3d.castShadow = true;
+					object3d.recieveShadow = true;
+					scope8.scene.add( object3d );
+					//object3d.position.y = 38 //This is how to move specific obj's positions//
+					object3d.position.y = 100
+					//object3d.scale.set(6,6,6)
+					//object3d.rotation.y = 110
+					console.log( 'Loading complete: ' + modelName8 );	
+					//attaches animation to obj				
+					tram_group_anim = object3d
+				};
+
+				const onLoadMtl8 = function ( mtlParseResult ) {
+
+					objLoader8.setModelName( modelName4 );
+					objLoader8.setLogging( true, true );
+					objLoader8.addMaterials( MtlObjBridge.addMaterialsFromMtlLoader( mtlParseResult ), true );
+					objLoader8.load( './objs/tram_group_3.obj', callbackOnLoad8, null, null, null );
+
+				};
+
+				const mtlLoader8 = new MTLLoader();
+
+				mtlLoader8.load( './objs/tram_group_3.mtl', onLoadMtl8 );
+
+
 
 				},
+
+
+
+				
 			//////////////////////////////////////////////////////////////////
 				//rendering functions for display, animations, and camera
 
