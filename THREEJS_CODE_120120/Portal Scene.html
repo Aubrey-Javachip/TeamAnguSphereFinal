@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>OBJLoader2 basic usage</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<style>
+			#glFullscreen {
+				width: 100%;
+				height: 100vh;
+				min-width: 640px;
+				min-height: 360px;
+				position: relative;
+				overflow: hidden;
+				z-index: 0;
+			}
+			#example {
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+				background-color: #ffffffff;
+			}
+		
+		</style>
+
+	</head>
+
+	<body>
+		<div id="glFullscreen">
+			<canvas id="example"></canvas>
+		</div>
+
+		<script type="module">
+
+			'use strict';
+
+      import * as THREE from './js/build/three.module.js'
+
+
+      import { OrbitControls } from './js/examples/jsm/controls/OrbitControls.js';
+      import { OBJLoader } from './js/examples/jsm/loaders/OBJLoader.js'; 
+
+			import { MTLLoader } from "./js/examples/jsm/loaders/MTLLoader.js";
+			import { OBJLoader2 } from "/js/examples/jsm/loaders/OBJLoader2.js";
+			import { MtlObjBridge } from "./js/examples/jsm/loaders/MtlObjBridge.js";
+        //const scene = new THREE.Scene();
+
+        let MyOBJ = null;
+		let MyOBJ2 = null;
+		let MyOBJ3 = null;
+
+			const OBJLoader2Example = function ( elementToBindTo ) {
+
+				this.renderer = null;
+				this.canvas = elementToBindTo;
+				this.aspectRatio = 1;
+				this.recalcAspectRatio();
+
+				this.scene = null;
+				this.cameraDefaults = {
+					posCamera: new THREE.Vector3( 0.0, 175.0, -600.0 ),
+					posCameraTarget: new THREE.Vector3( 0, 0, 0 ),
+					near: 0.1,
+					far: 10000,
+					fov: 45
+				};
+				this.camera = null;
+				this.cameraTarget = this.cameraDefaults.posCameraTarget;
+
+				this.controls = null;
+
+			};
+
+            
+
+			OBJLoader2Example.prototype = {
+
+				constructor: OBJLoader2Example,
+
+				initGL: function () {
+
+					this.renderer = new THREE.WebGLRenderer( {
+						canvas: this.canvas,
+						antialias: true,
+						autoClear: true
+					} );
+					this.renderer.setSize(window.innerWidth, window.innerHeight);
+					
+					//document.body.appendChild(renderer.domElement);
+					//document.body.appendChild(this.renderer.domElement)
+					this.renderer.setClearColor( 0x1c2e4a );
+					//this.renderer.setClearColor( 0xff595e );
+					//this.renderer.setClearColor( 0x5782a7 );
+
+					this.scene = new THREE.Scene();
+
+					this.camera = new THREE.PerspectiveCamera( this.cameraDefaults.fov, this.aspectRatio, this.cameraDefaults.near, this.cameraDefaults.far );
+					this.resetCamera();
+                    
+          this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+
+					//Create lighting and set positions, color, and intensity
+
+					//const ambientLight = new THREE.AmbientLight( 0x000000 );
+					const directionalLight1 = new THREE.DirectionalLight( 0xffffff );
+					const directionalLight2 = new THREE.DirectionalLight( 0xf3f3f3 );
+					const directionalLight3 = new THREE.DirectionalLight( 0x70e9ff );
+					directionalLight2.intensity = 0.6;
+					directionalLight3.intensity = 0.5;
+					directionalLight1.position.set( -100, -50, 100 );
+					directionalLight2.position.set( 100, 50, -100 );
+					directionalLight3.position.set( 100, 30, -100 );
+
+					//add the lights to the scene
+					this.scene.add( directionalLight1 );
+					this.scene.add( directionalLight2 );
+					this.scene.add( directionalLight3 );
+					//this.scene.add( ambientLight );
+
+					//add darkeness within rooms
+					const darkness = new THREE.DirectionalLight( 0x000000 );
+					const darkness2 = new THREE.DirectionalLight( 0x000000 );
+					darkness.intesnsity = 0.2;
+				 	darkness.position.set( -70, 8, 40 );
+					darkness2.position.set( -80, 10, 30 );
+					this.scene.add(darkness);
+					this.scene.add(darkness2);
+
+					//create colored spotlights
+					const spotLight = new THREE.SpotLight( 0x70e9ff );
+					//spotLight.position.set( -80, 50, 50 );
+					spotLight.position.set( -80, 10, 40);
+
+					spotLight.castShadow = false;
+
+					spotLight.shadow.mapSize.width = 1024;
+					spotLight.shadow.mapSize.height = 1024;
+
+					spotLight.shadow.camera.near = 500;
+					spotLight.shadow.camera.far = 4000;
+					spotLight.shadow.camera.fov = 30;
+
+					//add spotlight to the scene
+					this.scene.add( spotLight );
+					
+					//add level grid for positioning
+					const helper = new THREE.GridHelper( 1200, 60, 0xFF4444, 0x404040 );
+					//this.scene.add( helper );
+
+
+				},
+
+                
+				initContent: function () {
+
+
+					// create a wall
+                    const geometry2 = new THREE.BoxGeometry(100,50,5);
+                    const material2 = new THREE.MeshPhongMaterial({ color: 0xffffff });
+                    const cube2 = new THREE.Mesh(geometry2, material2);
+                    cube2.position.x = -210
+                    cube2.position.y = 50
+                    cube2.position.z = 28
+                    cube2.rotation.y = 300
+                    this.scene.add(cube2);
+
+                    //create a floor
+                    const geometry7 = new THREE.BoxGeometry(130,18,150);
+                    //const material3 = new THREE.MeshPhongMaterial({ color: 0xf5f5f5 });
+                    //const cube3 = new THREE.Mesh(geometry3, material3);
+					const loader3 = new THREE.TextureLoader();
+                    const texture3 = loader3.load('./objs/gridfloor.jpg');
+                    const material7 = new THREE.MeshPhongMaterial({ map: texture3 }); //map one image to every face
+                    const mesh3 = new THREE.Mesh(geometry7, material7);
+                    mesh3.position.x = -155
+                    mesh3.position.y = 30
+                    mesh3.position.z = 25
+                    this.scene.add(mesh3);
+
+
+					//load level sign
+					const geometry6 = new THREE.BoxGeometry( 10, 20, 2);
+                    const loader2 = new THREE.TextureLoader();
+                    const texture2 = loader2.load('./objs/levelsign.jpg');
+                    const material6 = new THREE.MeshPhongMaterial({ map: texture2 }); //map one image to every face
+                    const mesh2 = new THREE.Mesh(geometry6, material6);
+                    mesh2.position.y = 100
+                    mesh2.position.x = -50
+					mesh2.position.z = 88
+					mesh2.scale.set(2,2,2)
+                    this.scene.add(mesh2);
+                    
+					//Load Atlas w/ portal gun
+					const modelName = 'Atlas';
+					
+					const scope = this;
+					const objLoader2 = new OBJLoader2();
+					const callbackOnLoad = function ( object3d ) {
+                        
+						object3d.position.y = 25 //This is how to move specific obj's positions//
+						object3d.position.x = -20
+						object3d.position.z = -30
+						object3d.scale.set(6,6,6)
+						object3d.rotation.y = 110
+						scope.scene.add( object3d );
+						console.log( 'Loading complete: ' + modelName );
+						//MyOBJ = object3d;						
+
+					};
+
+					const onLoadMtl = function ( mtlParseResult ) {
+
+						objLoader2.setModelName( modelName );
+						objLoader2.setLogging( true, true );
+						objLoader2.addMaterials( MtlObjBridge.addMaterialsFromMtlLoader( mtlParseResult ), true );
+						objLoader2.load( './objs/Atlas.obj', callbackOnLoad, null, null, null );
+
+					};
+
+					const mtlLoader = new MTLLoader();
+					mtlLoader.load( './objs/Atlas.mtl', onLoadMtl );
+
+
+				////////////////////////////////////////
+				//load giant room
+				const modelName1 = 'room';
+					
+				const scope1 = this;
+				const objLoader1 = new OBJLoader2();
+				const callbackOnLoad1 = function ( object3d ) {
+                        
+					scope1.scene.add( object3d );
+					console.log( 'Loading complete: ' + modelName1 );						
+					//MyOBJ = object3d;
+				};
+
+				const onLoadMtl1 = function ( mtlParseResult ) {
+
+					objLoader1.setModelName( modelName1 );
+					objLoader1.setLogging( true, true );
+					objLoader1.addMaterials( MtlObjBridge.addMaterialsFromMtlLoader( mtlParseResult ), true );
+					objLoader1.load( './objs/cargoRoom2.obj', callbackOnLoad1, null, null, null );
+
+				};
+
+				const mtlLoader1 = new MTLLoader();
+
+				mtlLoader1.load( './objs/cargoRoom2.mtl', onLoadMtl1 );
+				
+				///////////////////////////////////
+				//load door
+				const modelName3 = 'door';
+					
+				const scope3 = this;
+				const objLoader3 = new OBJLoader2();
+				const callbackOnLoad3 = function ( object3d ) {
+                    
+					scope3.scene.add( object3d );
+					object3d.position.y = 38 //This is how to move specific obj's positions//
+					object3d.position.x = -140
+					object3d.position.z = 88
+					object3d.scale.set(8,8,8)
+					//object3d.rotation.y = 110
+					//object3d.rotation.y = 179
+					object3d.rotation.y = 300
+					console.log( 'Loading complete: ' + modelName3 );						
+				
+				};
+
+				const onLoadMtl3 = function ( mtlParseResult ) {
+
+					objLoader3.setModelName( modelName3 );
+					objLoader3.setLogging( true, true );
+					objLoader3.addMaterials( MtlObjBridge.addMaterialsFromMtlLoader( mtlParseResult ), true );
+					objLoader3.load( './objs/Door.obj', callbackOnLoad3, null, null, null );
+
+				};
+
+				const mtlLoader3 = new MTLLoader();
+
+				mtlLoader3.load( './objs/Door.mtl', onLoadMtl3 );
+
+				//load tram
+				const modelName4 = 'tram';
+					
+				const scope4 = this;
+				const objLoader4 = new OBJLoader2();
+				const callbackOnLoad4 = function ( object3d ) {
+                    
+					scope4.scene.add( object3d );
+					//object3d.position.y = 38 //This is how to move specific obj's positions//
+					object3d.position.z = 40
+					//object3d.scale.set(6,6,6)
+					object3d.rotation.y = 110
+					console.log( 'Loading complete: ' + modelName4 );	
+					//attaches animation to obj				
+					MyOBJ = object3d
+				};
+
+				const onLoadMtl4 = function ( mtlParseResult ) {
+
+					objLoader4.setModelName( modelName4 );
+					objLoader4.setLogging( true, true );
+					objLoader4.addMaterials( MtlObjBridge.addMaterialsFromMtlLoader( mtlParseResult ), true );
+					objLoader4.load( './objs/tram3.obj', callbackOnLoad4, null, null, null );
+
+				};
+
+				const mtlLoader4 = new MTLLoader();
+
+				mtlLoader4.load( './objs/tram3.mtl', onLoadMtl4 );
+
+				//load Turret
+				const modelName5 = 'turret';
+					
+				const scope5 = this;
+				const objLoader5 = new OBJLoader2();
+				const callbackOnLoad5 = function ( object3d ) {
+                    
+					scope5.scene.add( object3d );
+					object3d.position.y = 38 //This is how to move specific obj's positions//
+					object3d.position.x = -160
+			
+					object3d.position.z = 10
+					object3d.scale.set(7,7,7)
+					object3d.rotation.y = 110
+					console.log( 'Loading complete: ' + modelName5 );	
+										
+				
+				};
+
+				const onLoadMtl5 = function ( mtlParseResult ) {
+
+					objLoader5.setModelName( modelName5 );
+					objLoader5.setLogging( true, true );
+					objLoader5.addMaterials( MtlObjBridge.addMaterialsFromMtlLoader( mtlParseResult ), true );
+					objLoader5.load( './objs/Turret.obj', callbackOnLoad5, null, null, null );
+
+				};
+
+				const mtlLoader5 = new MTLLoader();
+
+				mtlLoader5.load( './objs/Turret.mtl', onLoadMtl5 );
+
+				//load Dispenser
+				const modelName6 = 'tube';
+					
+				const scope6 = this;
+				const objLoader6 = new OBJLoader2();
+				const callbackOnLoad6 = function ( object3d ) {
+                    
+					scope6.scene.add( object3d );
+					object3d.position.y = 130 //This is how to move specific obj's positions//
+					object3d.position.x = -60
+					object3d.position.z = 60
+					object3d.scale.set(8,8,8)
+					object3d.rotation.y = 10
+					console.log( 'Loading complete: ' + modelName4 );	
+										
+				};
+
+				const onLoadMtl6 = function ( mtlParseResult ) {
+
+					objLoader6.setModelName( modelName4 );
+					objLoader6.setLogging( true, true );
+					objLoader6.addMaterials( MtlObjBridge.addMaterialsFromMtlLoader( mtlParseResult ), true );
+					objLoader6.load( './objs/Dispenser.obj', callbackOnLoad6, null, null, null );
+
+				};
+
+				const mtlLoader6 = new MTLLoader();
+
+				mtlLoader6.load( './objs/Dispenser.mtl', onLoadMtl6 );
+
+				///////////////////////////////////
+
+				//load companion cube
+				let object;
+				//loadModel();
+				
+				function loadModel() {
+
+				object.traverse( function ( child ) {
+
+  				if ( child.isMesh ) child.material.map = texture11;} );
+					//set positions
+					object.position.y = 45;
+					object.position.x = -20
+					object.position.z = -75
+					object.scale.set(4,4,4)
+					scope.scene.add( object );
+					//attaches animation to obj
+					MyOBJ2 = object;
+					}
+
+				const manager = new THREE.LoadingManager( loadModel );
+
+				manager.onProgress = function ( item, loaded, total ) {
+
+				console.log( item, loaded, total );
+
+				};
+
+			// texture
+
+			const textureLoader11 = new THREE.TextureLoader( manager );
+			const texture11 = textureLoader11.load( 'objs/CompanionCubeUV.png' );
+
+			// model
+
+			function onProgress( xhr ) {
+
+			if ( xhr.lengthComputable ) {
+
+  			const percentComplete = xhr.loaded / xhr.total * 100;
+  			console.log( 'model ' + Math.round( percentComplete, 2 ) + '% downloaded' );
+
+				}
+
+				}
+
+				function onError() {}
+
+			const loader11 = new OBJLoader( manager );
+			loader11.load( 'objs/CompanionCube.obj', function ( obj ) {
+
+			object = obj;
+
+
+		}, onProgress, onError );
+
+		////////////////////
+		//2nd cube
+		const modelName7 = 'cube';
+					
+				const scope7 = this;
+				const objLoader7 = new OBJLoader2();
+				const callbackOnLoad7 = function ( object3d ) {
+                    //set positions and renders into scene
+					scope7.scene.add( object3d );
+					object3d.position.y = 160 //This is how to move specific obj's positions//
+					object3d.position.x = -60
+					object3d.position.z = 60
+					object3d.scale.set(4,4,4)
+					object3d.rotation.y = 10
+					console.log( 'Loading complete: ' + modelName7 );	
+					//attaches animation to obj
+					MyOBJ3 = object3d			
+				};
+
+				const onLoadMtl7 = function ( mtlParseResult ) {
+
+					objLoader7.setModelName( modelName7 );
+					objLoader7.setLogging( true, true );
+					objLoader7.addMaterials( MtlObjBridge.addMaterialsFromMtlLoader( mtlParseResult ), true );
+					objLoader7.load( './objs/CompanionCube.obj', callbackOnLoad7, null, null, null );
+
+				};
+
+				const mtlLoader7 = new MTLLoader();
+
+				mtlLoader7.load( './objs/CompanionCube.mtl', onLoadMtl7 );
+
+
+				},
+			//////////////////////////////////////////////////////////////////
+				//rendering functions for display, animations, and camera
+
+				animate: function() { 
+    					requestAnimationFrame( animate ); 
+    					this.renderer.render(this.scene, this.camera); 
+						mesh.rotation.x += 0.005; 
+						animate();
+						},
+					
+
+				resizeDisplayGL: function () {
+
+					//this.controls.handleResize();
+
+					this.recalcAspectRatio();
+					this.renderer.setSize( this.canvas.offsetWidth, this.canvas.offsetHeight, false );
+
+					this.updateCamera();
+
+				},
+
+				recalcAspectRatio: function () {
+
+					this.aspectRatio = ( this.canvas.offsetHeight === 0 ) ? 1 : this.canvas.offsetWidth / this.canvas.offsetHeight;
+
+				},
+
+				resetCamera: function () {
+
+					this.camera.position.copy( this.cameraDefaults.posCamera );
+					this.cameraTarget.copy( this.cameraDefaults.posCameraTarget );
+
+					this.updateCamera();
+
+				},
+
+				updateCamera: function () {
+
+					this.camera.aspect = this.aspectRatio;
+					this.camera.lookAt( this.cameraTarget );
+					this.camera.updateProjectionMatrix();
+
+				},
+
+				render: function () {
+
+					if ( ! this.renderer.autoClear ) this.renderer.clear();
+					this.controls.update();
+					this.renderer.render( this.scene, this.camera );
+
+				}
+			};
+
+            
+
+			const app = new OBJLoader2Example( document.getElementById( 'example' ) );
+
+			const resizeWindow = function () {
+
+				app.resizeDisplayGL();
+
+			};
+
+			const render = function () {
+
+				 //Animate the tram to move on rails
+				if(MyOBJ != null){
+				//var dxPerFrame = 1;
+				//MyOBJ.rotation.y += 0.005;
+				MyOBJ.position.x += 1; // move ball
+  				if(MyOBJ.position.x >= -100 )
+				  MyOBJ.position.x += -1;
+				//dxPerFrame = -1; // if we're too far right, move towards the left
+ 				if(MyOBJ.position.x <= 500)
+				 MyOBJ.position.x += 1;
+				
+				//Animate the cube to spin with Atlas
+				if(MyOBJ2 != null){
+					MyOBJ2.rotation.y += 0.005;	
+				}
+
+				//Animate the background cube in the dispenser
+				if(MyOBJ3 != null){
+					MyOBJ3.rotation.y += 0.005;
+					MyOBJ3.rotation.x += 0.005	
+				}
+
+				
+				   //dxPerFrame =  0; // if we're too far left, move towards the right again
+			}
+				requestAnimationFrame( render );
+				app.render();
+
+			};
+			//update and call functions
+			window.addEventListener( 'resize', resizeWindow, false );
+
+			console.log( 'Starting initialisation phase...' );
+			app.initGL();
+			app.resizeDisplayGL();
+			app.initContent();
+
+			render();
+
+
+		</script>
+	</body>
+</html>
